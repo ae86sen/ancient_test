@@ -27,6 +27,8 @@ from projects.serializers import ProjectsModelSerializer, \
     InterfacesByProjectIdModelSerializer
 
 # 定义日志器用于记录日志，logging.getLogger('全局配置settings.py中定义的日志器名')
+from testsuits.models import Testsuits
+
 logger = logging.getLogger('mytest')
 
 
@@ -53,20 +55,33 @@ class ProjectsViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
         results = response.data['results']
+        data_list = []
         # item为一条项目数据所在的字典
         # 需要获取当前项目所属的接口总数、用例总数、配置总数、套件总数
         for item in results:
             # 获取项目id
             project_id = item.get('id')
             # 获取每个项目接口总数
-            interface_count = Interfaces.objects.filter(project_id=project_id).count()
+            interfaces_count = Interfaces.objects.filter(project_id=project_id).count()
             # 获取每个接口用例总数
-            testcase_count = Interfaces.objects.annotate(testcase=Count('testcases')).values('id', 'testcase')
+            testcase_qs = Interfaces.objects.annotate(testcase=Count('testcases')).values('id', 'testcase').filter(project_id=project_id)
+            testcases_count = 0
+            for one_dict in testcase_qs:
+                testcases_count += one_dict.get('testcase')
             # 获取每个接口配置总数
-            configure_count = Interfaces.objects.annotate(configure=Count('configures')).values('id', 'configure')
+            configure_qs = Interfaces.objects.values('id').annotate(configure=Count('configures')).filter(project_id=project_id)
+            configures_count = 0
+            for one_dict in configure_qs:
+                configures_count += one_dict.get('configure')
             # 获取每个项目测试套件总数
-            testsuit_count = Projects.objects.annotate(testsuit=Count('testsuits')).values('id', 'testsuit').filter(id=project_id)
-            pass
+            testsuits_count = Testsuits.objects.filter(project_id=project_id).count()
+            item['interfaces'] = interfaces_count
+            item['testcases'] = testcases_count
+            item['testsuits'] = testsuits_count
+            item['configures'] = configures_count
+            data_list.append(item)
+        response.data['results'] = data_list
+        return response
 
     @action(methods=['get'], detail=False, url_path='xxxx')
     def names(self, request, *args, **kwargs):
