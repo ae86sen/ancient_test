@@ -1,0 +1,19 @@
+from rest_framework import serializers
+
+from envs.models import Envs
+from utils import common
+
+
+class EnvsModelSerializer(serializers.ModelSerializer):
+    # project = serializers.StringRelatedField()
+    # project_id = serializers.PrimaryKeyRelatedField(queryset=Projects.objects.all(), write_only=True)
+
+    class Meta:
+        model = Envs
+        exclude = ['update_time']
+        extra_kwargs = {
+            'create_time': {
+                'read_only': True,
+                'format': common.datetime_fmt()
+            }
+        }

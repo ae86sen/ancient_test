@@ -39,8 +39,12 @@ from rest_framework.documentation import include_docs_urls
 # ]
 urlpatterns = [
     path('docs/', include_docs_urls(title='古一平台', description='测试平台接口文档')),
-    path('', include('projects.urls')),
     path('api/', include('rest_framework.urls')),
-    path('user/', include('user.urls'))
+    path('user/', include('user.urls')),
+    path('', include('projects.urls')),
+    path('', include('interfaces.urls')),
+    path('', include('envs.urls')),
+    path('', include('debugtalks.urls')),
 ]
+
 

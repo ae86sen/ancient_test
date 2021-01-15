@@ -42,6 +42,8 @@ class ProjectsViewSet(viewsets.ModelViewSet):
         添加项目
     destroy:
         删除项目
+    names:
+        返回项目id和名称
     """
     queryset = Projects.objects.all()
     serializer_class = ProjectsModelSerializer
@@ -83,18 +85,19 @@ class ProjectsViewSet(viewsets.ModelViewSet):
         response.data['results'] = data_list
         return response
 
-    @action(methods=['get'], detail=False, url_path='xxxx')
+    @action(methods=['get'], detail=False)
     def names(self, request, *args, **kwargs):
         # 过滤
         qs = self.filter_queryset(self.get_queryset())
         # 分页
-        page = self.paginate_queryset(qs)
-        logger.info(page)
-        if page is not None:
-            serializer = self.get_serializer(instance=page, many=True)
-            return self.get_paginated_response(serializer.data)
+        # page = self.paginate_queryset(qs)
+        # logger.info(page)
+        # if page is not None:
+        #     serializer = self.get_serializer(instance=page, many=True)
+        #     return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(instance=qs, many=True)
         return Response(serializer.data)
+        # return self.list(request, *args, **kwargs)
 
     @action(methods=['get'], detail=True)
     def interfaces(self, request, *args, **kwargs):
