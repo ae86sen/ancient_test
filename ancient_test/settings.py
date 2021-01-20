@@ -229,3 +229,7 @@ JWT_AUTH = {
         'utils.jwt_handle.jwt_response_payload_handler',
         'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
 }
+
+# 在全局配置文件settings.py文件中定义变量，变量名要大写
+# django.conf.setting
+REPORT_DIR = os.path.join(BASE_DIR, 'reports')

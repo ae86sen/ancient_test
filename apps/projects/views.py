@@ -88,7 +88,7 @@ class ProjectsViewSet(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False)
     def names(self, request, *args, **kwargs):
         # 过滤
-        qs = self.filter_queryset(self.get_queryset())
+        qs = self.get_queryset()
         # 分页
         # page = self.paginate_queryset(qs)
         # logger.info(page)
@@ -101,10 +101,12 @@ class ProjectsViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=True)
     def interfaces(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer_obj = self.get_serializer(instance=instance)
+        # instance = self.get_object()
+        # serializer_obj = self.get_serializer(instance=instance)
+        response = self.retrieve(request,*args,**kwargs)
+        response.data = response.data['interfaces']
         # 进行过滤和分页操作
-        return Response(serializer_obj.data)
+        return response
 
     def get_serializer_class(self):
         # 如果action名字为names，就调用ProjectsNamesModelSerializer序列化器

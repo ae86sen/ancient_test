@@ -17,3 +17,9 @@ class EnvsModelSerializer(serializers.ModelSerializer):
                 'format': common.datetime_fmt()
             }
         }
+
+
+class EnvsNamesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Envs
+        fields = ('id', 'name')
