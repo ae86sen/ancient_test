@@ -1,0 +1,5 @@
+djangorestframework_jwt==1.11.0
+django_filter==2.4.0
+Faker==4.14.0
+Django==3.1.4
+djangorestframework==3.12.2
