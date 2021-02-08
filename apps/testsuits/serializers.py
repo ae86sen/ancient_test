@@ -5,7 +5,7 @@ from rest_framework import serializers
 from interfaces.models import Interfaces
 from projects.models import Projects
 from testsuits.models import Testsuits
-from utils import common
+from utils import common, validates
 
 
 def validate_include(value):
@@ -52,3 +52,12 @@ class TestsuitsModelSerializer(serializers.ModelSerializer):
         project = validated_data.pop('project_id')
         validated_data['project_id'] = project.id
         return super().update(instance,validated_data)
+
+
+class TestsuitsRunSerializer(serializers.ModelSerializer):
+    env_id = serializers.IntegerField(label='环境变量ID', help_text='环境变量ID',
+                                      write_only=True, validators=[validates.is_existed_env_id])
+
+    class Meta:
+        model = Testsuits
+        fields = ['id', 'env_id']

@@ -1,13 +1,18 @@
 import json
+import os
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from envs.models import Envs
 from interfaces.models import Interfaces
 from projects.models import Projects
 from testcases.models import Testcases
-from testcases.serializers import TestcasesModelSerializer
-from utils import handle_datas
+from testcases.serializers import TestcasesModelSerializer, TestcasesRunSerializer
+from utils import handle_datas, common
+from ancient_test import settings
+from datetime import datetime
 
 
 class TestSuitsViewSet(viewsets.ModelViewSet):
@@ -84,14 +89,32 @@ class TestSuitsViewSet(viewsets.ModelViewSet):
             "url": url,
             "param": params,  # 查询参数
             "header": headers,
-            "variable": data_variable,   # form表单请求数据
+            "variable": data_variable,  # form表单请求数据
             "jsonVariable": json_variable,  # json请求数据
 
             "extract": extract,
             "validate": validate,
-            "globalVar": variables,   # 变量
+            "globalVar": variables,  # 变量
             "parameterized": parameters,  # 参数化数据
             "setupHooks": setup_hooks,
             "teardownHooks": teardown_hooks,
         }
         return Response(datas)
+
+    @action(methods=['post'], detail=True)
+    def run(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        env_id = serializer.validated_data['env_id']
+        testcase_dir_path = os.path.join(settings.SUITES_DIR, datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f'))
+        # 在suites目录下创建一个以时间戳命名的路径
+        os.mkdir(testcase_dir_path)
+        env = Envs.objects.filter(id=env_id).first()
+        # 生成用例yaml文件
+        common.generate_testcase_file(instance, env, testcase_dir_path)
+        # 执行用例并生成报告
+        return common.run_testcase(instance, testcase_dir_path)
+
+    def get_serializer_class(self):
+        return TestcasesRunSerializer if self.action == 'run' else self.serializer_class

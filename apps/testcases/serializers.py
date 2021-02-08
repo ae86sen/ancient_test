@@ -9,21 +9,6 @@ from testsuits.models import Testsuits
 from utils import validates
 
 
-def is_existed_interface_id(value):
-    obj = re.match(r'^\[\d+(,\d+)*\]$', value)
-    if obj is None:
-        raise serializers.ValidationError('输入参数格式有误')
-    else:
-        res = obj.group()
-        try:
-            data = eval(res)
-        except:
-            raise serializers.ValidationError('输入参数格式有误')
-        for item in data:
-            if not Interfaces.objects.filter(id=item).exists():
-                raise serializers.ValidationError(f'接口id【{item}】不存在')
-
-
 class InterfacesProjectsModelSerializer(serializers.ModelSerializer):
     project = serializers.StringRelatedField(label='所属项目', help_text='所属项目')
     pid = serializers.IntegerField(label='所属项目id', help_text='所属项目id', write_only=True,
@@ -73,3 +58,12 @@ class TestcasesModelSerializer(serializers.ModelSerializer):
         iid = validated_data.pop('interface').get('iid')
         validated_data['interface_id'] = iid
         return super().update(instance, validated_data)
+
+
+class TestcasesRunSerializer(serializers.ModelSerializer):
+    env_id = serializers.IntegerField(label='环境变量ID', help_text='环境变量ID',
+                                      write_only=True, validators=[validates.is_existed_env_id])
+
+    class Meta:
+        model = Testcases
+        fields = ['id', 'env_id']
